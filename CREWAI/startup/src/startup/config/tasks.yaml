@@ -1,0 +1,16 @@
+research_task:
+  description: >
+    对 {topic} 进行深入全面的研究。
+    请确保找到有趣且相关的信息，当前年份是 {current_year}。
+  expected_output: >
+    一个包含10个要点的列表，列出关于 {topic} 最相关的信息
+  agent: researcher
+
+reporting_task:
+  description: >
+    审阅你获得的上下文信息，将每个主题扩展为报告的完整章节。
+    确保报告内容详尽，包含所有相关信息。
+  expected_output: >
+    一份完整的报告，包含主要主题，每个主题都有完整的信息章节。
+    使用 Markdown 格式，不要使用 '```' 代码块
+  agent: reporting_analyst
