@@ -1,0 +1,84 @@
+# =============================================================================
+# MCP Server 注册表配置
+# 文件: src/config/mcp_server_registry.yaml
+# 说明: 定义所有可用的MCP Server及其能力
+# =============================================================================
+
+# MCP Server 注册表
+# 每个server定义了名称、启动命令、能力描述等信息
+
+servers:
+  # ---------------------------------------------------------------------------
+  # 音量控制 Server
+  # ---------------------------------------------------------------------------
+  - name: volume-control
+    description: 控制视频流的音量
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/volume_server.py"
+    capabilities:
+      - name: get_volume
+        description: 获取当前音量值
+        keywords: [音量, 查询音量, 当前音量]
+      - name: set_volume
+        description: 设置音量到指定值(0-100)
+        keywords: [设置音量, 调整音量, 音量设为]
+      - name: adjust_volume
+        description: 增加或减少音量
+        keywords: [增大音量, 减小音量, 音量加, 音量减]
+      - name: mute
+        description: 静音
+        keywords: [静音, 关闭声音, 消音]
+
+  # ---------------------------------------------------------------------------
+  # 亮度/对比度控制 Server
+  # ---------------------------------------------------------------------------
+  - name: brightness-control
+    description: 调节视频的亮度和对比度
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/brightness_server.py"
+    capabilities:
+      - name: get_brightness
+        description: 获取当前亮度值
+        keywords: [亮度, 查询亮度, 当前亮度]
+      - name: set_brightness
+        description: 设置亮度到指定值(0-100)
+        keywords: [设置亮度, 调整亮度, 亮度设为, 调亮, 调暗]
+      - name: get_contrast
+        description: 获取当前对比度值
+        keywords: [对比度, 查询对比度]
+      - name: set_contrast
+        description: 设置对比度到指定值(0-100)
+        keywords: [设置对比度, 调整对比度, 对比度设为]
+      - name: reset_display
+        description: 重置亮度和对比度到默认值
+        keywords: [重置, 恢复默认, 还原]
+
+  # ---------------------------------------------------------------------------
+  # 视频滤镜 Server
+  # ---------------------------------------------------------------------------
+  - name: video-filter
+    description: 应用各种视频滤镜效果
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/video_filter_server.py"
+    capabilities:
+      - name: get_filters
+        description: 获取当前所有滤镜状态
+        keywords: [滤镜状态, 当前滤镜, 查询滤镜]
+      - name: apply_mosaic
+        description: 应用马赛克效果
+        keywords: [马赛克, 打码, 模糊处理]
+      - name: apply_blur
+        description: 应用虚化/模糊效果
+        keywords: [虚化, 模糊, 柔焦, 朦胧]
+      - name: apply_invert
+        description: 应用颜色反转效果
+        keywords: [颜色反转, 反色, 负片]
+      - name: apply_grayscale
+        description: 应用灰度效果
+        keywords: [灰度, 黑白, 去色]
+      - name: clear_all_filters
+        description: 清除所有滤镜效果
+        keywords: [清除滤镜, 移除滤镜, 取消滤镜, 恢复原样]
