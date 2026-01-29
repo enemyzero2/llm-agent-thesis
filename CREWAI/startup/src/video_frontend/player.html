@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频播放器 - OBS控制演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-group {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .control-group h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider-container label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .status {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .info {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info strong {
+            color: #f57c00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 视频播放器 - OBS控制演示</h1>
+
+        <div class="info">
+            <strong>📌 说明：</strong><br>
+            这是一个演示页面。实际的音量控制由 <strong>OBS Studio</strong> 处理。<br>
+            通过 <strong>MCP Server</strong> 可以控制OBS中的音频源音量。
+        </div>
+
+        <div class="video-wrapper">
+            <video id="videoPlayer" controls>
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                您的浏览器不支持视频播放。
+            </video>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <h3>🔊 音量控制</h3>
+                <div class="slider-container">
+                    <label>音量</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                    <div class="value-display" id="volumeValue">50%</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>☀️ 亮度控制</h3>
+                <div class="slider-container">
+                    <label>亮度</label>
+                    <input type="range" id="brightnessSlider" min="0" max="200" value="100">
+                    <div class="value-display" id="brightnessValue">100%</div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>🎨 对比度控制</h3>
+                <div class="slider-container">
+                    <label>对比度</label>
+                    <input type="range" id="contrastSlider" min="0" max="200" value="100">
+                    <div class="value-display" id="contrastValue">100%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status" id="status">
+            ✅ 就绪 - 调整滑块以控制视频效果
+        </div>
+    </div>
+
+    <script src="player.js"></script>
+</body>
+</html>

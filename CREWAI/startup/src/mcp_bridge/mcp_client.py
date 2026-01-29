@@ -26,6 +26,7 @@ class MCPClient:
         """初始化MCP客户端"""
         self.sessions: Dict[str, ClientSession] = {}
         self.server_params: Dict[str, StdioServerParameters] = {}
+        self.context_managers: Dict[str, Any] = {}  # 保存context manager
 
     async def connect(
         self,
@@ -56,8 +57,13 @@ class MCPClient:
             )
             self.server_params[server_name] = server_params
 
-            # 建立连接 - 不使用async with，保持连接
-            read_stream, write_stream = await stdio_client(server_params)
+            # 建立连接 - 手动管理context manager以保持连接
+            client_cm = stdio_client(server_params)
+            read_stream, write_stream = await client_cm.__aenter__()
+
+            # 保存context manager供后续关闭使用
+            self.context_managers[server_name] = client_cm
+
             session = ClientSession(read_stream, write_stream)
 
             # 初始化会话
@@ -156,8 +162,16 @@ class MCPClient:
             # 关闭指定Server
             if server_name in self.sessions:
                 try:
+                    # 先关闭session
                     await self.sessions[server_name].close()
                     del self.sessions[server_name]
+
+                    # 再关闭context manager
+                    if server_name in self.context_managers:
+                        cm = self.context_managers[server_name]
+                        await cm.__aexit__(None, None, None)
+                        del self.context_managers[server_name]
+
                     print(f"[OK] 已关闭 '{server_name}'")
                 except Exception as e:
                     print(f"[ERROR] 关闭 '{server_name}' 失败: {e}")
