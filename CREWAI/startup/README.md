@@ -1,54 +1,59 @@
-# Startup Crew
+# CrewAI OBS控制系统
 
-Welcome to the Startup Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+基于 [CrewAI](https://crewai.com) 框架的智能Agent系统，用于控制OBS直播软件。
 
-## Installation
+## 项目简介
 
-Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+这个项目让你可以用**自然语言**控制OBS，比如说"把麦克风音量调到50%"，AI Agent会自动完成操作。
 
-First, if you haven't already, install uv:
+## 安装
+
+确保已安装 Python >=3.10 <3.14。本项目使用 [uv](https://docs.astral.sh/uv/) 管理依赖。
 
 ```bash
+# 安装uv
 pip install uv
+
+# 安装依赖
+uv sync
+```
+## 配置
+
+在 `.env` 文件中配置：
+
+```env
+OPENAI_API_KEY="你的API密钥"
+OPENAI_API_BASE="https://你的API地址/v1"
+MODEL="模型名称"
 ```
 
-Next, navigate to your project directory and install the dependencies:
-
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
-### Customizing
-
-**Add your `OPENAI_API_KEY` into the `.env` file**
-
-- Modify `src/startup/config/agents.yaml` to define your agents
-- Modify `src/startup/config/tasks.yaml` to define your tasks
-- Modify `src/startup/crew.py` to add your own logic, tools and specific args
-- Modify `src/startup/main.py` to add custom inputs for your agents and tasks
-
-## Running the Project
-
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
+## 运行
 
 ```bash
-$ crewai run
+# 1. 启动后端服务（需要先打开OBS）
+uv run python src/main.py backend
+
+# 2. 运行Agent（新终端）
+uv run python src/main.py agent "获取所有场景"
 ```
 
-This command initializes the startup Crew, assembling the agents and assigning them tasks as defined in your configuration.
+## 项目结构
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+```
+src/
+├── config.py          # 配置管理
+├── main.py            # 入口文件
+├── tools/             # 工具定义
+├── agents/            # Agent定义
+├── mcp_servers/       # MCP服务器
+└── video_backend/     # Flask后端
+```
 
-## Understanding Your Crew
+## 学习指南
 
-The startup Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
+详细的学习指南请查看 [LEARNING_GUIDE.md](LEARNING_GUIDE.md)
 
-## Support
+## 相关文档
 
-For support, questions, or feedback regarding the Startup Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
-
-Let's create wonders together with the power and simplicity of crewAI.
+- [CrewAI 文档](https://docs.crewai.com)
+- [CrewAI GitHub](https://github.com/joaomdmoura/crewai)

@@ -32,7 +32,17 @@ async function loadScenes() {
         const res = await fetch(`${API}/scenes`);
         const data = await res.json();
 
+        if (data.error) {
+            updateStatus('加载场景失败: ' + data.error);
+            return;
+        }
+
         const container = document.getElementById('scenes');
+        if (!data.scenes || data.scenes.length === 0) {
+            container.innerHTML = '<p>没有找到场景</p>';
+            return;
+        }
+
         container.innerHTML = data.scenes.map(scene => `
             <button class="scene-btn ${scene === data.current ? 'active' : ''}"
                     onclick="switchScene('${scene}')">
@@ -67,8 +77,13 @@ async function loadAudio() {
         const res = await fetch(`${API}/audio/sources`);
         const data = await res.json();
 
+        if (data.error) {
+            updateStatus('加载音频失败: ' + data.error);
+            return;
+        }
+
         const container = document.getElementById('audio');
-        if (data.sources.length === 0) {
+        if (!data.sources || data.sources.length === 0) {
             container.innerHTML = '<p>没有找到音频源</p>';
             return;
         }

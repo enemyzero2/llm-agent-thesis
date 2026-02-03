@@ -23,7 +23,20 @@
       "Bash(python:*)",
       "Bash(findstr:*)",
       "Bash(tasklist:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:docs.crewai.com)",
+      "WebFetch(domain:github.com)",
+      "mcp__plugin_github_github__get_file_contents",
+      "mcp__plugin_github_github__search_code",
+      "Bash(pip show:*)",
+      "Bash(where:*)",
+      "Bash(conda activate:*)",
+      "Bash(\"E:\\\\TOOLS\\\\MiniConda\\\\envs\\\\bi-she\\\\python.exe\" src/demo_mcp_agent.py)",
+      "Bash(.venvScriptspython.exe:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run python:*)",
+      "Bash(uv add:*)"
     ]
   }
 }
