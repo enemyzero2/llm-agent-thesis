@@ -23,9 +23,10 @@ llm = get_llm()
 MCP_SERVER_PATH = str(PROJECT_ROOT / "src" / "mcp_servers" / "obs_control_server.py")
 
 # 配置MCP Server (stdio方式)
+# 使用 uv run 来确保使用项目虚拟环境
 obs_mcp_server = MCPServerStdio(
-    command="python",
-    args=[MCP_SERVER_PATH],
+    command="uv",
+    args=["run", "python", MCP_SERVER_PATH],
     env={"OBS_BACKEND_URL": BACKEND_URL}
 )
 
@@ -34,8 +35,15 @@ def create_obs_agent():
     """创建OBS控制Agent"""
     return Agent(
         role="OBS视频控制专家",
-        goal="根据用户指令控制OBS的场景切换和音量调节",
-        backstory="你是一个专业的视频直播控制专家，熟悉OBS的各种操作。",
+        goal="使用提供的MCP工具来执行OBS控制操作。你必须调用工具来获取真实数据，绝不能编造或猜测结果。",
+        backstory="""你是一个专业的OBS控制执行者。
+
+【重要规则】
+1. 你必须使用提供的工具(get_scenes, switch_scene, get_audio_sources, set_volume)来执行操作
+2. 绝对不能编造场景列表、音量数值等任何数据
+3. 如果工具返回error字段，你必须如实告知用户操作失败，并说明错误原因
+4. 不要给用户提供"如何手动操作OBS"的教程，直接执行工具获取结果
+5. 如果无法连接OBS，直接报告连接失败，不要编造任何数据""",
         llm=llm,
         mcp_servers=[obs_mcp_server],
         verbose=True
