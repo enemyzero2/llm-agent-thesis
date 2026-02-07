@@ -8,7 +8,8 @@ CrewAI OBS控制系统 - 主入口
 命令:
     backend  - 启动Flask后端服务
     agent    - 运行OBS控制Agent (传统工具方式)
-    mcp      - 运行OBS控制Agent (MCP方式)
+    mcp      - 运行OBS控制Agent (MCP方式，仅场景控制)
+    multi    - 运行多能力智能体 (支持所有能力引擎)
     demo     - 运行演示
 """
 
@@ -101,6 +102,23 @@ def print_help():
     print(__doc__)
 
 
+def run_multi_agent(user_input: str = None):
+    """运行多能力智能体"""
+    from src.agents.multi_capability_agent import run_task, interactive_mode
+    from src.config import MODEL
+
+    print("=" * 50)
+    print("OBS多能力智能体 (全部能力引擎)")
+    print(f"使用模型: {MODEL}")
+    print("=" * 50)
+
+    if user_input is None:
+        interactive_mode()
+    else:
+        result = run_task(user_input)
+        print(f"\n结果: {result}")
+
+
 def main():
     """主函数"""
     if len(sys.argv) < 2:
@@ -117,6 +135,9 @@ def main():
     elif command == "mcp":
         user_input = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else None
         run_mcp_agent(user_input)
+    elif command == "multi":
+        user_input = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else None
+        run_multi_agent(user_input)
     elif command == "demo":
         run_demo()
     elif command in ["help", "-h", "--help"]:
@@ -128,3 +149,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

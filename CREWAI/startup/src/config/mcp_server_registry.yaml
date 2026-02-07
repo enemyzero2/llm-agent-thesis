@@ -82,3 +82,140 @@ servers:
       - name: clear_all_filters
         description: 清除所有滤镜效果
         keywords: [清除滤镜, 移除滤镜, 取消滤镜, 恢复原样]
+
+  # ---------------------------------------------------------------------------
+  # OBS字幕控制 Server
+  # ---------------------------------------------------------------------------
+  - name: obs-subtitle
+    description: 控制OBS字幕显示
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/obs_subtitle_server.py"
+    capabilities:
+      - name: create_subtitle
+        description: 创建字幕文本源
+        keywords: [创建字幕, 添加字幕, 字幕源]
+      - name: update_subtitle
+        description: 更新字幕内容
+        keywords: [更新字幕, 修改字幕, 字幕文本]
+      - name: set_subtitle_style
+        description: 设置字幕样式
+        keywords: [字幕样式, 字体, 颜色, 大小]
+      - name: show_subtitle
+        description: 显示字幕
+        keywords: [显示字幕, 打开字幕]
+      - name: hide_subtitle
+        description: 隐藏字幕
+        keywords: [隐藏字幕, 关闭字幕]
+      - name: set_subtitle_position
+        description: 设置字幕位置
+        keywords: [字幕位置, 移动字幕]
+
+  # ---------------------------------------------------------------------------
+  # OBS真实滤镜控制 Server
+  # ---------------------------------------------------------------------------
+  - name: obs-filter
+    description: 控制OBS真实滤镜效果
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/obs_filter_server.py"
+    capabilities:
+      - name: list_filters
+        description: 获取源的所有滤镜列表
+        keywords: [滤镜列表, 查看滤镜]
+      - name: add_filter
+        description: 添加滤镜到源
+        keywords: [添加滤镜, 应用滤镜, 新建滤镜]
+      - name: remove_filter
+        description: 删除源的滤镜
+        keywords: [删除滤镜, 移除滤镜]
+      - name: set_filter_settings
+        description: 修改滤镜参数
+        keywords: [滤镜参数, 滤镜设置, 调整滤镜]
+      - name: toggle_filter
+        description: 启用/禁用滤镜
+        keywords: [开关滤镜, 启用滤镜, 禁用滤镜]
+      - name: apply_color_correction
+        description: 快速应用色彩校正
+        keywords: [色彩校正, 亮度, 对比度, 饱和度]
+
+  # ---------------------------------------------------------------------------
+  # OBS同声传译 Server
+  # ---------------------------------------------------------------------------
+  - name: obs-translation
+    description: 语音识别和实时翻译(OpenAI)
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/obs_translation_server.py"
+    capabilities:
+      - name: transcribe_audio_file
+        description: 语音识别音频文件
+        keywords: [语音识别, 转文字, whisper]
+      - name: translate_text
+        description: 翻译文本
+        keywords: [翻译, 同声传译, 多语言]
+      - name: transcribe_and_translate
+        description: 语音识别并翻译
+        keywords: [语音翻译, 实时翻译]
+      - name: set_translation_config
+        description: 配置翻译参数
+        keywords: [翻译设置, 语言设置]
+
+  # ---------------------------------------------------------------------------
+  # OBS录制/直播控制 Server
+  # ---------------------------------------------------------------------------
+  - name: obs-recording
+    description: 控制OBS录制和直播
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/obs_recording_server.py"
+    capabilities:
+      - name: start_recording
+        description: 开始录制
+        keywords: [开始录制, 录制, 录像]
+      - name: stop_recording
+        description: 停止录制
+        keywords: [停止录制, 结束录制]
+      - name: pause_recording
+        description: 暂停录制
+        keywords: [暂停录制]
+      - name: get_record_status
+        description: 获取录制状态
+        keywords: [录制状态, 是否录制]
+      - name: start_streaming
+        description: 开始直播推流
+        keywords: [开始直播, 推流, 直播]
+      - name: stop_streaming
+        description: 停止直播推流
+        keywords: [停止直播, 结束直播]
+      - name: get_stream_status
+        description: 获取直播状态
+        keywords: [直播状态, 是否直播]
+      - name: start_virtual_cam
+        description: 启动虚拟摄像头
+        keywords: [虚拟摄像头, 虚拟相机]
+      - name: stop_virtual_cam
+        description: 停止虚拟摄像头
+        keywords: [关闭虚拟摄像头]
+
+  # ---------------------------------------------------------------------------
+  # OBS背景虚化 Server
+  # ---------------------------------------------------------------------------
+  - name: obs-background
+    description: 背景虚化和虚拟背景
+    command: python
+    args:
+      - "E:/【本科毕设】/CREWAI/startup/src/mcp_servers/obs_background_server.py"
+    capabilities:
+      - name: apply_background_blur
+        description: 应用背景虚化效果
+        keywords: [背景虚化, 模糊背景, 虚化]
+      - name: set_virtual_background
+        description: 设置虚拟背景
+        keywords: [虚拟背景, 替换背景, 背景图片]
+      - name: apply_chroma_key
+        description: 应用绿幕抠像
+        keywords: [绿幕, 色度键, 抠像]
+      - name: get_video_sources
+        description: 获取视频源列表
+        keywords: [视频源, 摄像头列表]

@@ -76,8 +76,19 @@ python src/mcp_servers/test_obs_server.py
 
 ### MCP Server 文件
 
+**基础功能:**
+- `src/mcp_servers/obs_control_server.py` - OBS场景和音频控制
 - `src/mcp_servers/obs_volume_server.py` - OBS音量控制MCP服务器
-- `src/mcp_servers/test_obs_server.py` - 测试脚本
+
+**高级功能:**
+- `src/mcp_servers/obs_subtitle_server.py` - OBS字幕显示控制
+- `src/mcp_servers/obs_filter_server.py` - OBS真实滤镜控制
+- `src/mcp_servers/obs_translation_server.py` - 同声传译(OpenAI Whisper + GPT)
+- `src/mcp_servers/obs_recording_server.py` - 录制/直播/虚拟摄像头控制
+
+**测试脚本:**
+- `src/mcp_servers/test_obs_server.py` - 基础功能测试
+- `src/mcp_servers/test_obs_advanced.py` - 高级功能测试
 
 ### 前端文件
 
@@ -171,29 +182,79 @@ result = await client.call_tool(
 )
 ```
 
-## 🎯 下一步扩展
+## 🎯 已实现的高级功能
 
-### 可以添加的功能：
+### 1. 字幕控制 (obs-subtitle)
+```python
+# 创建字幕
+await client.call_tool("obs-subtitle", "create_subtitle", {
+    "source_name": "字幕", 
+    "text": "Hello World!",
+    "font_size": 48,
+    "color": "#FFFFFF"
+})
 
-1. **场景控制**
-   - 切换场景
-   - 获取场景列表
-   - 创建/删除场景
+# 更新字幕内容
+await client.call_tool("obs-subtitle", "update_subtitle", {
+    "source_name": "字幕",
+    "text": "新的字幕内容"
+})
+```
 
-2. **源控制**
-   - 显示/隐藏源
-   - 调整源位置和大小
-   - 添加/删除源
+### 2. 滤镜控制 (obs-filter)
+```python
+# 添加色彩校正滤镜
+await client.call_tool("obs-filter", "add_filter", {
+    "source_name": "摄像头",
+    "filter_name": "暖色调",
+    "filter_type": "color_correction",
+    "settings": {"saturation": 0.2, "brightness": 0.1}
+})
 
-3. **滤镜控制**
-   - 添加色彩校正滤镜
-   - 调整亮度/对比度/饱和度
-   - 添加特效滤镜
+# 快速调整亮度/对比度
+await client.call_tool("obs-filter", "apply_color_correction", {
+    "source_name": "摄像头",
+    "brightness": 0.1,
+    "contrast": 0.2
+})
+```
 
-4. **录制/直播控制**
-   - 开始/停止录制
-   - 开始/停止直播
-   - 获取录制状态
+### 3. 同声传译 (obs-translation)
+```python
+# 配置翻译
+await client.call_tool("obs-translation", "set_translation_config", {
+    "source_language": "en",
+    "target_language": "zh",
+    "subtitle_source": "翻译字幕"
+})
+
+# 翻译音频文件
+await client.call_tool("obs-translation", "transcribe_and_translate", {
+    "audio_path": "audio.wav"
+})
+```
+
+### 4. 录制/直播控制 (obs-recording)
+```python
+# 开始录制
+await client.call_tool("obs-recording", "start_recording", {})
+
+# 获取录制状态
+status = await client.call_tool("obs-recording", "get_record_status", {})
+
+# 开始直播
+await client.call_tool("obs-recording", "start_streaming", {})
+
+# 启动虚拟摄像头
+await client.call_tool("obs-recording", "start_virtual_cam", {})
+```
+
+### 环境变量配置
+
+翻译功能需要设置 OpenAI API Key:
+```bash
+set OPENAI_API_KEY=your-api-key-here
+```
 
 ## ❓ 常见问题
 
