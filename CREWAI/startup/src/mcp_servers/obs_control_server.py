@@ -1,87 +1,125 @@
 # -*- coding: utf-8 -*-
 """
+=============================================================================
 OBS控制 MCP Server
-通过HTTP API与Flask后端通信，控制OBS
-
-使用方式:
-    python -m src.mcp_servers.obs_control_server
+文件: src/mcp_servers/obs_control_server.py
+说明: 直接通过OBS WebSocket控制场景和音量（不依赖Flask后端）
+=============================================================================
 """
 
 import asyncio
 import json
-import urllib.request
-import urllib.error
 import os
 import sys
+from typing import Optional
 
 from mcp.server import Server
 from mcp.types import Tool, TextContent
 
-# 服务器名称
+# 尝试导入obs-websocket-py
+try:
+    from obswebsocket import obsws, requests as obs_requests
+    OBS_AVAILABLE = True
+except ImportError:
+    OBS_AVAILABLE = False
+    print("[WARNING] obs-websocket-py未安装", file=sys.stderr)
+
+# MCP Server实例
 SERVER_NAME = "obs-control"
 server = Server(SERVER_NAME)
 
-# Flask后端地址（可通过环境变量配置）
-BACKEND_URL = os.getenv("OBS_BACKEND_URL", "http://localhost:5000/api")
+# OBS连接配置（从环境变量读取，与config.py保持一致）
+OBS_HOST = os.getenv("OBS_HOST", "localhost")
+OBS_PORT = int(os.getenv("OBS_PORT", "4455"))
+OBS_PASSWORD = os.getenv("OBS_PASSWORD", "123456")
+
+# OBS WebSocket客户端
+obs_client: Optional[obsws] = None
 
 
-def call_api(endpoint, method="GET", data=None):
-    """调用Flask后端API
+def connect_obs() -> bool:
+    """连接到OBS WebSocket"""
+    global obs_client
 
-    Args:
-        endpoint: API端点
-        method: HTTP方法
-        data: 请求数据
+    if not OBS_AVAILABLE:
+        print(f"[{SERVER_NAME}] obs-websocket-py未安装", file=sys.stderr)
+        return False
 
-    Returns:
-        API响应结果，失败时返回包含error和message的字典
-    """
-    url = f"{BACKEND_URL}/{endpoint}"
     try:
-        if data:
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(data).encode('utf-8'),
-                headers={'Content-Type': 'application/json'},
-                method=method
-            )
-        else:
-            req = urllib.request.Request(url, method=method)
-
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            result = json.loads(resp.read().decode('utf-8'))
-            # 检查响应中是否包含error字段
-            if isinstance(result, dict) and "error" in result:
-                return {
-                    "success": False,
-                    "error": result["error"],
-                    "message": f"【操作失败】OBS返回错误: {result['error']}。请确保OBS正在运行且WebSocket服务已启用。"
-                }
-            return result
-    except urllib.error.URLError as e:
-        return {
-            "success": False,
-            "error": f"无法连接后端服务: {e.reason}",
-            "message": f"【连接失败】无法连接到后端服务。请确保: 1) Flask后端已启动 2) OBS正在运行 3) WebSocket服务已启用"
-        }
-    except urllib.error.HTTPError as e:
-        try:
-            error_body = json.loads(e.read().decode('utf-8'))
-            error_msg = error_body.get('error', str(e.reason))
-        except:
-            error_msg = str(e.reason)
-        return {
-            "success": False,
-            "error": f"HTTP错误 {e.code}: {error_msg}",
-            "message": f"【请求失败】HTTP {e.code}错误: {error_msg}。请检查OBS连接状态。"
-        }
+        obs_client = obsws(OBS_HOST, OBS_PORT, OBS_PASSWORD)
+        obs_client.connect()
+        print(f"[{SERVER_NAME}] 已连接到OBS ({OBS_HOST}:{OBS_PORT})", file=sys.stderr)
+        return True
     except Exception as e:
-        return {
-            "success": False,
-            "error": f"请求失败: {str(e)}",
-            "message": f"【未知错误】{str(e)}"
-        }
+        print(f"[{SERVER_NAME}] 连接OBS失败: {e}", file=sys.stderr)
+        obs_client = None
+        return False
 
+
+# ============= 场景控制 =============
+
+def get_scenes() -> dict:
+    """获取所有场景列表"""
+    if obs_client is None:
+        return {"error": "未连接到OBS"}
+    try:
+        result = obs_client.call(obs_requests.GetSceneList())
+        scenes = [s['sceneName'] for s in result.getScenes()]
+        current = result.getCurrentProgramSceneName()
+        return {"scenes": scenes, "current": current}
+    except Exception as e:
+        return {"error": f"获取场景失败: {str(e)}"}
+
+
+def switch_scene(scene_name: str) -> dict:
+    """切换到指定场景"""
+    if obs_client is None:
+        return {"error": "未连接到OBS"}
+    try:
+        obs_client.call(obs_requests.SetCurrentProgramScene(sceneName=scene_name))
+        return {"success": True, "scene": scene_name, "message": f"已切换到场景: {scene_name}"}
+    except Exception as e:
+        return {"error": f"切换场景失败: {str(e)}"}
+
+
+# ============= 音量控制 =============
+
+def get_audio_sources() -> dict:
+    """获取所有音频源及其音量"""
+    if obs_client is None:
+        return {"error": "未连接到OBS"}
+    try:
+        inputs = obs_client.call(obs_requests.GetInputList())
+        audio_sources = []
+        for inp in inputs.getInputs():
+            try:
+                vol = obs_client.call(obs_requests.GetInputVolume(inputName=inp['inputName']))
+                audio_sources.append({
+                    "name": inp['inputName'],
+                    "volume": int(vol.getInputVolumeMul() * 100)
+                })
+            except:
+                pass
+        return {"sources": audio_sources}
+    except Exception as e:
+        return {"error": f"获取音频源失败: {str(e)}"}
+
+
+def set_volume(source: str, volume: int) -> dict:
+    """设置音频源音量（0-100）"""
+    if obs_client is None:
+        return {"error": "未连接到OBS"}
+    try:
+        obs_client.call(obs_requests.SetInputVolume(
+            inputName=source,
+            inputVolumeMul=volume / 100.0
+        ))
+        return {"success": True, "source": source, "volume": volume, "message": f"已设置 {source} 音量为 {volume}"}
+    except Exception as e:
+        return {"error": f"设置音量失败: {str(e)}"}
+
+
+# ============= MCP 接口 =============
 
 @server.list_tools()
 async def list_tools() -> list[Tool]:
@@ -126,19 +164,18 @@ async def list_tools() -> list[Tool]:
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     """处理工具调用"""
-    if name == "get_scenes":
-        result = call_api("scenes")
-    elif name == "switch_scene":
-        result = call_api("scenes/switch", "POST", {"scene": arguments["scene"]})
-    elif name == "get_audio_sources":
-        result = call_api("audio/sources")
-    elif name == "set_volume":
-        result = call_api("audio/volume", "POST", {
-            "source": arguments["source"],
-            "volume": arguments["volume"]
-        })
+    tool_handlers = {
+        "get_scenes":       lambda args: get_scenes(),
+        "switch_scene":     lambda args: switch_scene(args["scene"]),
+        "get_audio_sources": lambda args: get_audio_sources(),
+        "set_volume":       lambda args: set_volume(args["source"], args["volume"]),
+    }
+
+    handler = tool_handlers.get(name)
+    if handler:
+        result = handler(arguments)
     else:
-        result = {"error": f"Unknown tool: {name}"}
+        result = {"error": f"未知工具: {name}"}
 
     return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False))]
 
@@ -148,10 +185,14 @@ async def main():
     from mcp.server.stdio import stdio_server
 
     print(f"[{SERVER_NAME}] MCP Server 启动中...", file=sys.stderr)
-    print(f"[{SERVER_NAME}] 后端地址: {BACKEND_URL}", file=sys.stderr)
+    connect_obs()
 
-    async with stdio_server() as (read, write):
-        await server.run(read, write, server.create_initialization_options())
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(
+            read_stream,
+            write_stream,
+            server.create_initialization_options()
+        )
 
 
 if __name__ == "__main__":
